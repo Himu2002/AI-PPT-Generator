@@ -1,11 +1,14 @@
 import './App.css'
+import Header from './components/ui/custom/Header'
+import Hero from './components/ui/custom/Hero'
 
 function App() {
 
 
   return (
     <div>
-      <h2>Hello Himu</h2>
+      <Header />
+      <Hero />
     </div>
   )
 }
