@@ -1,6 +1,6 @@
 import { Button } from '../button'
 import { Link } from 'react-router-dom'
-import { useUser, SignInButton, UserButton } from '@clerk/react'
+import { useUser, SignInButton } from '@clerk/react'
 import { Play } from 'lucide-react'
 import { HeroVideoDialog } from '@/components/ui/hero-video-dialog'
 
