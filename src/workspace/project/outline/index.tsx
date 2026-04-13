@@ -2,6 +2,8 @@ import { firebaseDb } from '../../../../config/FirebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
+import SlidersStyle from '@/components/ui/custom/SlidersStyle';
+import OutlineSection from '@/components/ui/custom/OutlineSection';
 
 type Project = {
     ProjectId: string,
@@ -17,8 +19,9 @@ function Outline() {
     const [projectDetail, setProjectDetail] = useState<Project | null>();
 
     useEffect(() => {
+        console.log(projectDetail);
         projectId && GetProjectDetail();
-    }, [projectId])
+    }, [projectId, projectDetail])
 
     const GetProjectDetail = async () => {
         const docref = doc(firebaseDb, "projects", projectId ?? "");
@@ -32,7 +35,13 @@ function Outline() {
         }
     }
     return (
-        <div>Outline</div>
+        <div className='flex justify-center mt-20'>
+            <div className='max-w-3xl w-full'>
+                <h2 className='font-bold text-2xl'>Settings and Slider Outline</h2>
+                <SlidersStyle />
+                <OutlineSection />
+            </div>
+        </div>
     )
 }
 
