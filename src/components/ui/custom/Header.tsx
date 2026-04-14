@@ -13,6 +13,7 @@ const Header = () => {
     const [userDetails] = useContext(UserDetailContext)
 
     console.log(location.pathname)
+
     return (
         <div className='flex items-center justify-between p-4 px-10 shadow'>
             <div className='flex-1'>
