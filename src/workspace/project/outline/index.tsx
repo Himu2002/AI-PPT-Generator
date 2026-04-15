@@ -1,9 +1,15 @@
 import { firebaseDb, GeminiAiModel } from '../../../../config/FirebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import SlidersStyle from '@/components/ui/custom/SlidersStyle';
 import OutlineSection from '@/components/ui/custom/OutlineSection';
+
+// export type Outline = {
+//     slideNo: string,
+//     slidePoint: string,
+//     outline: string
+// }
 
 type Project = {
     ProjectId: string,
@@ -11,8 +17,9 @@ type Project = {
     cretedBy: string,
     createdAt: number,
     noOfSliders: string,
-    outline: any[]
+    outline: any
 };
+
 
 const OUTLINE_PROMPT = `Generate a PowerPoint slide outline for the topic {userInput}. Create {noOfSliders} slides in total. 
 Each slide should include a topic name and a 2-line descriptive outline that clearly explains what content the slide will cover.
@@ -33,39 +40,42 @@ Return the response only in JSON format, following this schema:
 function Outline() {
     const { projectId } = useParams();
     const [loading, setLoading] = useState(false);
-    const requestedProjectIdRef = useRef<string | null>(null);
 
     useEffect(() => {
-        if (!projectId) return;
-        if (requestedProjectIdRef.current === projectId) return;
-        requestedProjectIdRef.current = projectId;
-        void GetProjectDetail();
+        projectId && GetProjectDetail();
     }, [projectId])
 
     const GetProjectDetail = async () => {
         const docref = doc(firebaseDb, "projects", projectId ?? "");
         const docSnap: any = await getDoc(docref);
 
-        if (docSnap.exists()) {
-            if (docSnap.data()?.outline?.length) {
-                return;
-            }
-            GenerateSlidersOutline(docSnap.data());
+        if (!docSnap.exists()) {
+            return;
+        }
+
+        const projectData = docSnap.data() as Project;
+        console.log(projectData);
+
+        if (Array.isArray(projectData?.outline)) {
+            console.log('```json');
+            console.log(JSON.stringify(projectData.outline, null, 2));
+        }
+
+        if (!projectData?.outline) {
+            GenerateSlidersOutline(projectData);
         }
     }
 
     const GenerateSlidersOutline = async (ProjectData: Project) => {
         setLoading(true);
-        // Provide a prompt that contains text
         const prompt = OUTLINE_PROMPT
-            .replace("{userInput}", ProjectData.userInputPrompt ?? "")
-            .replace("{noOfSliders}", ProjectData.noOfSliders ?? "5");
+            .replace("{userInput}", ProjectData?.userInputPrompt)
+            .replace("{noOfSliders}", ProjectData?.noOfSliders);
 
-        // To generate text output, call generateContent with the text input
         const result = await GeminiAiModel.generateContent(prompt);
-
         const response = result.response;
-        response.text();
+        const text = response.text();
+        console.log(text);
         setLoading(false);
     }
 
@@ -80,4 +90,6 @@ function Outline() {
     )
 }
 
+
 export default Outline
+
