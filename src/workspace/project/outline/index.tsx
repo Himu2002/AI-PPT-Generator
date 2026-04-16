@@ -1,23 +1,22 @@
 import { firebaseDb, GeminiAiModel } from '../../../../config/FirebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import SlidersStyle from '@/components/ui/custom/SlidersStyle';
 import OutlineSection from '@/components/ui/custom/OutlineSection';
 
-// export type Outline = {
-//     slideNo: string,
-//     slidePoint: string,
-//     outline: string
-// }
+export type Outline = {
+    slideNo: string,
+    slidePoint: string,
+    outline: string
+}
 
 type Project = {
-    ProjectId: string,
     userInputPrompt: string,
-    cretedBy: string,
+    ProjectId: string,
     createdAt: number,
     noOfSliders: string,
-    outline: any
+    outline: Outline[]
 };
 
 
@@ -36,14 +35,59 @@ Return the response only in JSON format, following this schema:
  }
 ]`
 
+const DUMMY_OUTLINE: Outline[] = [
+    {
+        slideNo: "1",
+        slidePoint: "Welcome",
+        outline: "Introduction to Hello and what this presentation will cover."
+    },
+    {
+        slideNo: "2",
+        slidePoint: "Agenda",
+        outline: "Overview of the main sections and learning goals for this presentation."
+    },
+    {
+        slideNo: "3",
+        slidePoint: "Hello - Key Point 1",
+        outline: "Core explanation, practical example, and key takeaway for this section."
+    },
+    {
+        slideNo: "4",
+        slidePoint: "Hello - Key Point 2",
+        outline: "Core explanation, practical example, and key takeaway for this section."
+    },
+    {
+        slideNo: "5",
+        slidePoint: "Thank You",
+        outline: "Summary of important points, final thoughts, and a closing thank-you message."
+    }
+]
+
 
 function Outline() {
     const { projectId } = useParams();
     const [loading, setLoading] = useState(false);
+    const fetchedProjectIdRef = useRef<string | null>(null);
+    const [projectDetail, setProjectDetail] = useState<Project | null>(null);
+    const [outline, setOutline] = useState<Outline[]>(DUMMY_OUTLINE);
 
     useEffect(() => {
-        projectId && GetProjectDetail();
+        if (!projectId || fetchedProjectIdRef.current === projectId) {
+            return;
+        }
+
+        fetchedProjectIdRef.current = projectId;
+        GetProjectDetail();
     }, [projectId])
+
+    const LogFormattedOutline = (rawOutline: any) => {
+        const orderedOutline = Array.isArray(rawOutline)
+            ? rawOutline.map(({ slideNo, slidePoint, outline }: any) => ({ slideNo, slidePoint, outline }))
+            : [{ slideNo: rawOutline?.slideNo, slidePoint: rawOutline?.slidePoint, outline: rawOutline?.outline }];
+
+        console.log('```json');
+        console.log(JSON.stringify(orderedOutline, null, 2));
+    }
 
     const GetProjectDetail = async () => {
         const docref = doc(firebaseDb, "projects", projectId ?? "");
@@ -53,17 +97,15 @@ function Outline() {
             return;
         }
 
-        const projectData = docSnap.data() as Project;
-        console.log(projectData);
+        const projectData = docSnap.data();
+        setProjectDetail(projectData);
 
-        if (Array.isArray(projectData?.outline)) {
-            console.log('```json');
-            console.log(JSON.stringify(projectData.outline, null, 2));
+        if (Array.isArray(projectData?.outline) && projectData.outline.length > 0) {
+            LogFormattedOutline(projectData.outline);
+            return;
         }
 
-        if (!projectData?.outline) {
-            GenerateSlidersOutline(projectData);
-        }
+        //GenerateSlidersOutline(projectData);
     }
 
     const GenerateSlidersOutline = async (ProjectData: Project) => {
@@ -73,10 +115,30 @@ function Outline() {
             .replace("{noOfSliders}", ProjectData?.noOfSliders);
 
         const result = await GeminiAiModel.generateContent(prompt);
+
         const response = result.response;
         const text = response.text();
-        console.log(text);
+
+
+        try {
+            const rawJson = text.replace(/```json|```/g, '').trim();
+            const JSONData = JSON.parse(rawJson);
+            LogFormattedOutline(JSONData);
+            setOutline(JSONData);
+        } catch {
+            // Fallback to raw model output if parsing fails.
+            console.log(text);
+        }
+
         setLoading(false);
+    }
+
+    const handleUpdateOutline = (index: string, value: Outline) => {
+        setOutline((prev) =>
+            prev.map((item) =>
+                item.slideNo === index ? { ...item, ...value } : item
+            )
+        );
     }
 
     return (
@@ -84,11 +146,13 @@ function Outline() {
             <div className='max-w-3xl w-full'>
                 <h2 className='font-bold text-2xl'>Settings and Slider Outline</h2>
                 <SlidersStyle />
-                <OutlineSection loading={loading} />
+                <OutlineSection loading={loading} outline={outline || []}
+                    handleUpdateOutline={(index: string, value: Outline) => handleUpdateOutline(index, value)} />
             </div>
         </div>
     )
 }
+
 
 
 export default Outline
