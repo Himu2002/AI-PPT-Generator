@@ -19,4 +19,4 @@ export const firebaseDb = getFirestore(app, '(default)');
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
 // Create a `GenerativeModel` instance with a model that supports your use case
-export const GeminiAiModel = getGenerativeModel(ai, { model: "gemini-3-flash-preview" });
+export const GeminiAiModel = getGenerativeModel(ai, { model: "gemini-2.5-flash" });

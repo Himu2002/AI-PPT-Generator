@@ -25,7 +25,6 @@ const Workspace = () => {
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                console.log("Document data:", docSnap.data());
                 setUserDetails(docSnap.data());
             } else {
                 // If this is a new user, save their details with some free credits
