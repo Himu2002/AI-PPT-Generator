@@ -103,7 +103,7 @@ function SlidersStyle() {
                         <img src={design.bannerImage} alt={design.styleName}
                             width={300}
                             height={300}
-                            className='w-full h-[120px] rounded-2xl object-cover hover:scale-105 transition-all'
+                            className='w-full h-30 rounded-2xl object-cover hover:scale-105 transition-all'
                         />
                         <h2 className='font-medium text-center mt-2'>
                             {design.styleName}
