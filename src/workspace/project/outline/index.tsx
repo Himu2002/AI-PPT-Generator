@@ -1,9 +1,12 @@
 import { firebaseDb, GeminiAiModel } from '../../../../config/FirebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import SlidersStyle from '@/components/ui/custom/SlidersStyle';
+import SlidersStyle, { type DesignStyle } from '@/components/ui/custom/SlidersStyle';
 import OutlineSection from '@/components/ui/custom/OutlineSection';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Loader2Icon } from 'lucide-react';
+import { set } from 'date-fns';
 
 export type Outline = {
     slideNo: string,
@@ -70,6 +73,8 @@ function Outline() {
     const fetchedProjectIdRef = useRef<string | null>(null);
     const [projectDetail, setProjectDetail] = useState<Project | null>(null);
     const [outline, setOutline] = useState<Outline[]>(DUMMY_OUTLINE);
+    const [selectedStyle, setSelectedStyle] = useState<DesignStyle>();
+    const [UpdateDbLoading, setUpdateDbLoading] = useState(false);
 
     useEffect(() => {
         if (!projectId || fetchedProjectIdRef.current === projectId) {
@@ -141,14 +146,33 @@ function Outline() {
         );
     }
 
+    const onGenerateSlider = async () => {
+        setUpdateDbLoading(true);
+        //Update DB
+        await setDoc(doc(firebaseDb, "projects", projectId ?? ""), {
+            designStyle: selectedStyle,
+            outline: outline
+        }, {
+            merge: true
+        });
+        setUpdateDbLoading(false);
+
+    }
     return (
         <div className='flex justify-center mt-20'>
             <div className='max-w-3xl w-full'>
                 <h2 className='font-bold text-2xl'>Settings and Slider Outline</h2>
-                <SlidersStyle />
+                <SlidersStyle selectStyle={(value: DesignStyle) => setSelectedStyle(value)} />
                 <OutlineSection loading={loading} outline={outline || []}
                     handleUpdateOutline={(index: string, value: Outline) => handleUpdateOutline(index, value)} />
             </div>
+            <Button size={'lg'} className='fixed bottom-6
+            transform left-1/2 -translate-x-1/2'
+                onClick={onGenerateSlider}
+                disabled={UpdateDbLoading || loading || !selectedStyle}>
+                {UpdateDbLoading && <Loader2Icon className='animate-spin' />}
+                Generate Sliders<ArrowRight />
+            </Button>
         </div>
     )
 }

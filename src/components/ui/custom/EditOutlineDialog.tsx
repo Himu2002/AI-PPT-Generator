@@ -17,6 +17,7 @@ import {
 function EditOutlineDialog({ children, outlineData, onUpdate }: any) {
     const [localData, setLocalData] = useState(outlineData);
     const [openDialog, setOpenDialog] = useState(false);
+
     const handleChange = (field: string, value: string) => {
         setLocalData((prevData: any) => ({
             ...prevData,

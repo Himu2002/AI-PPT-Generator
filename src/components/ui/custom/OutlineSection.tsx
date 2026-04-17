@@ -7,7 +7,7 @@ import EditOutlineDialog from './EditOutlineDialog';
 type Props = {
     loading: boolean;
     outline?: Outline[];
-    handleUpdateOutline: (slideNo: string, updatedData: any) => void;
+    handleUpdateOutline: any
 }
 
 const OutlineSection = ({ loading, outline, handleUpdateOutline }: Props) => {
@@ -36,14 +36,10 @@ const OutlineSection = ({ loading, outline, handleUpdateOutline }: Props) => {
                         <EditOutlineDialog outlineData={item} onUpdate={handleUpdateOutline}>
                             <Button variant={'ghost'} size={'icon-lg'} ><Edit /></Button>
                         </EditOutlineDialog>
+
                     </div>
                 ))}
             </div>
-
-            <Button size={'lg'} className='fixed bottom-6
-            transform left-1/2 -translate-x-1/2 '>
-                Generate Sliders<ArrowRight />
-            </Button>
         </div>
     )
 }

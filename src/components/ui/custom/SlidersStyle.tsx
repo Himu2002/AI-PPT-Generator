@@ -90,7 +90,19 @@ const Design_Styles = [
     },
 ];
 
-function SlidersStyle() {
+type Props = {
+    selectStyle: any
+}
+
+export type DesignStyle = {
+    styleName: string;
+    colors: any,
+    designGuide: string,
+    icon: string,
+    bannerImage: string
+}
+
+function SlidersStyle({ selectStyle }: Props) {
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
 
     return (
@@ -99,7 +111,7 @@ function SlidersStyle() {
             <div className='grid grid-cols-2 md:grid-cols-3 gap-5 mt-5'>
                 {Design_Styles.map((design, index) => (
                     <div key={index} className={`cursor-pointer border-2 rounded-2xl p-2 ${selectedStyle === design.styleName ? 'p-2 border-primary rounded-2xl' : 'border-transparent'}`}
-                        onClick={() => setSelectedStyle(design.styleName)}>
+                        onClick={() => { setSelectedStyle(design.styleName); selectStyle(design) }}>
                         <img src={design.bannerImage} alt={design.styleName}
                             width={300}
                             height={300}
