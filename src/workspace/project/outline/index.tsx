@@ -2,7 +2,7 @@ import { firebaseDb, GeminiAiModel } from '../../../../config/FirebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import SlidersStyle, { type DesignStyle } from '@/components/ui/custom/SlidersStyle';
+import SlidersStyle from '@/components/ui/custom/SlidersStyle';
 import OutlineSection from '@/components/ui/custom/OutlineSection';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2Icon } from 'lucide-react';
@@ -14,14 +14,21 @@ export type Outline = {
     outline: string
 }
 
-type Project = {
+export type Project = {
     userInputPrompt: string,
     ProjectId: string,
     createdAt: number,
     noOfSliders: string,
-    outline: Outline[]
+    outline: Outline[],
+    slides: any[],
+    designStyle: DesignStyle
 };
 
+export type DesignStyle = {
+    colors: any,
+    designGuide: string,
+    styleName: string,
+}
 
 const OUTLINE_PROMPT = `Generate a PowerPoint slide outline for the topic {userInput}. Create {noOfSliders} slides in total. 
 Each slide should include a topic name and a 2-line descriptive outline that clearly explains what content the slide will cover.
@@ -156,6 +163,8 @@ function Outline() {
             merge: true
         });
         setUpdateDbLoading(false);
+
+        //Navigate to slider Editor
 
     }
     return (
